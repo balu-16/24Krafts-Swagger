@@ -1,0 +1,1807 @@
+openapi: 3.0.3
+info:
+  title: 24Krafts Backend API
+  description: |
+    Complete API documentation for the 24Krafts mobile application backend.
+    
+    ## Authentication
+    This API uses two authentication methods:
+    - **Session Auth**: `Authorization: Session <session_id>` - Used for most endpoints
+    - **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for some endpoints
+    
+    ## Getting Started
+    1. Send OTP to your phone number using `/auth/send-otp`
+    2. Verify OTP using `/auth/verify-otp` or complete signup using `/auth/signup`
+    3. Use session login `/auth/session/login` to get a session token
+    4. Include the session token in subsequent requests
+  version: 1.0.0
+  contact:
+    name: 24Krafts Support
+
+servers:
+  - url: https://24-krafts-backend.vercel.app/api
+    description: Production Server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Auth
+    description: Authentication and session management
+  - name: Users
+    description: User management
+  - name: Profiles
+    description: Profile management
+  - name: Posts
+    description: Posts and project applications
+  - name: Projects
+    description: Project management
+  - name: Chat
+    description: Conversations and messaging
+  - name: Schedules
+    description: Schedule management
+  - name: Uploads
+    description: File uploads
+  - name: Notifications
+    description: Push notification management
+  - name: Admin
+    description: Admin endpoints
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Session token in format: Session <session_id>"
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Auth DTOs
+    SendOtpRequest:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          example: "9876543210"
+          description: 10-digit Indian mobile number
+
+    VerifyOtpRequest:
+      type: object
+      required:
+        - phone
+        - otp
+      properties:
+        phone:
+          type: string
+          example: "9876543210"
+        otp:
+          type: string
+          minLength: 6
+          maxLength: 6
+          example: "123456"
+
+    SignupRequest:
+      type: object
+      required:
+        - phone
+        - otp
+        - firstName
+        - email
+        - gender
+        - department
+        - state
+        - city
+        - role
+        - aadharNumber
+      properties:
+        phone:
+          type: string
+          example: "9876543210"
+        otp:
+          type: string
+          example: "123456"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        alternativePhone:
+          type: string
+        maaAssociativeNumber:
+          type: string
+        gender:
+          type: string
+          enum: [Male, Female, Non-binary, Prefer not to say]
+        department:
+          type: string
+          example: "Acting"
+        state:
+          type: string
+          example: "Maharashtra"
+        city:
+          type: string
+          example: "Mumbai"
+        profilePhoto:
+          type: string
+          description: Base64 encoded image
+        role:
+          type: string
+          enum: [artist, recruiter]
+        companyName:
+          type: string
+          description: Required for recruiters
+        companyPhone:
+          type: string
+        companyEmail:
+          type: string
+        companyLogo:
+          type: string
+        website:
+          type: string
+        facebook:
+          type: string
+        twitter:
+          type: string
+        instagram:
+          type: string
+        youtube:
+          type: string
+        customLinks:
+          type: array
+          items:
+            type: string
+        aadharNumber:
+          type: string
+          minLength: 16
+          maxLength: 16
+          pattern: "^\\d{16}$"
+        bio:
+          type: string
+
+    SessionLoginRequest:
+      type: object
+      required:
+        - phone
+        - otp
+      properties:
+        phone:
+          type: string
+          example: "9876543210"
+        otp:
+          type: string
+          example: "123456"
+        deviceInfo:
+          type: string
+
+    # Profile DTOs
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        alt_phone:
+          type: string
+        maa_associative_number:
+          type: string
+        gender:
+          type: string
+        department:
+          type: string
+        state:
+          type: string
+        city:
+          type: string
+        bio:
+          type: string
+        profile_photo_url:
+          type: string
+        company_id:
+          type: string
+          format: uuid
+
+    BecomeRecruiterRequest:
+      type: object
+      required:
+        - companyName
+      properties:
+        companyName:
+          type: string
+        companyPhone:
+          type: string
+        companyEmail:
+          type: string
+        companyLogo:
+          type: string
+
+    UpgradePremiumRequest:
+      type: object
+      required:
+        - planType
+      properties:
+        planType:
+          type: string
+          enum: [monthly, yearly]
+        paymentId:
+          type: string
+
+    # Post DTOs
+    CreatePostRequest:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          example: "Looking for actors"
+        description:
+          type: string
+          example: "We need talented actors for our upcoming project"
+        requirements:
+          type: string
+        location:
+          type: string
+        department:
+          type: string
+        departments:
+          type: array
+          items:
+            type: string
+        deadline:
+          type: string
+          format: date-time
+        image:
+          type: string
+          description: Base64 encoded image
+        caption:
+          type: string
+        status:
+          type: string
+          enum: [open, closed, in_progress, completed]
+
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        department:
+          type: string
+        departments:
+          type: array
+          items:
+            type: string
+        deadline:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [open, closed, in_progress, completed]
+
+    CreateCommentRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+
+    ApplyToProjectRequest:
+      type: object
+      properties:
+        cover_letter:
+          type: string
+        portfolio_link:
+          type: string
+
+    UpdateApplicationStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending, accepted, rejected, withdrawn]
+
+    # Project DTOs
+    CreateProjectRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+
+    AddProjectMemberRequest:
+      type: object
+      required:
+        - profile_id
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+        role_in_project:
+          type: string
+
+    # Chat DTOs
+    CreateConversationRequest:
+      type: object
+      required:
+        - member_ids
+      properties:
+        is_group:
+          type: boolean
+          default: false
+        name:
+          type: string
+        member_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        metadata:
+          type: object
+        client_msg_id:
+          type: string
+
+    UpdateTypingRequest:
+      type: object
+      required:
+        - is_typing
+      properties:
+        is_typing:
+          type: boolean
+
+    # Schedule DTOs
+    CreateScheduleRequest:
+      type: object
+      required:
+        - project_id
+        - date
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          example: "09:00"
+        end_time:
+          type: string
+          example: "17:00"
+        location:
+          type: string
+
+    AddScheduleMemberRequest:
+      type: object
+      required:
+        - profile_id
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+
+    UpdateScheduleMemberStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [accepted, declined, pending]
+
+    # Notification DTOs
+    SaveTokenRequest:
+      type: object
+      required:
+        - token
+        - platform
+      properties:
+        token:
+          type: string
+        platform:
+          type: string
+          enum: [ios, android]
+        device_name:
+          type: string
+        app_version:
+          type: string
+        os_version:
+          type: string
+        timezone:
+          type: string
+
+    RevokeTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+
+    SendPushRequest:
+      type: object
+      required:
+        - tokens
+        - title
+        - body
+      properties:
+        tokens:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        body:
+          type: string
+        data:
+          type: object
+          properties:
+            route:
+              type: string
+            id:
+              type: string
+
+    # Common Response Schemas
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        nextCursor:
+          type: string
+        hasMore:
+          type: boolean
+
+paths:
+  # Health
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API is running
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+                    example: 24Krafts Backend API
+
+  # Auth Endpoints
+  /auth/send-otp:
+    post:
+      tags:
+        - Auth
+      summary: Send OTP
+      description: Send OTP to the provided phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendOtpRequest'
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  phoneNumber:
+                    type: string
+                  userExists:
+                    type: boolean
+        '400':
+          description: Invalid phone number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/verify-otp:
+    post:
+      tags:
+        - Auth
+      summary: Verify OTP
+      description: Verify OTP for existing users login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpRequest'
+      responses:
+        '200':
+          description: OTP verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  isNewUser:
+                    type: boolean
+                  token:
+                    type: string
+                  user:
+                    type: object
+        '400':
+          description: Invalid or expired OTP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Complete signup
+      description: Complete user registration with all details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+                  user:
+                    type: object
+                  profile:
+                    type: object
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/profile:
+    get:
+      tags:
+        - Auth
+      summary: Get current user profile
+      description: Get the authenticated user's profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/cleanup-otps:
+    post:
+      tags:
+        - Auth
+      summary: Cleanup expired OTPs
+      description: Remove expired OTP records from database
+      responses:
+        '200':
+          description: Cleanup successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/session/login:
+    post:
+      tags:
+        - Auth
+      summary: Session login
+      description: Login with OTP and create a persistent session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionLoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  sessionId:
+                    type: string
+                  user:
+                    type: object
+                  profile:
+                    type: object
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/session/validate:
+    get:
+      tags:
+        - Auth
+      summary: Validate session
+      description: Validate the current session token
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Session is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  user:
+                    type: object
+                  role:
+                    type: string
+        '401':
+          description: Invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/session/logout:
+    post:
+      tags:
+        - Auth
+      summary: Session logout
+      description: Invalidate the current session
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # Users
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Profiles
+  /profiles:
+    get:
+      tags:
+        - Profiles
+      summary: List profiles
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [artist, recruiter]
+      responses:
+        '200':
+          description: List of profiles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+  /profiles/{id}:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile by ID
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Profile details
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Profile not found
+
+    put:
+      tags:
+        - Profiles
+      summary: Update profile
+      description: Update your own profile
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot update other user's profile
+
+  /profiles/{id}/become-recruiter:
+    post:
+      tags:
+        - Profiles
+      summary: Become a recruiter
+      description: Upgrade artist account to recruiter
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BecomeRecruiterRequest'
+      responses:
+        '200':
+          description: Upgraded to recruiter
+        '401':
+          description: Unauthorized
+
+  /profiles/{id}/upgrade-premium:
+    post:
+      tags:
+        - Profiles
+      summary: Upgrade to premium
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpgradePremiumRequest'
+      responses:
+        '200':
+          description: Upgraded to premium
+
+  # Posts
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: List posts
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: profileId
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+    post:
+      tags:
+        - Posts
+      summary: Create post
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created
+        '400':
+          description: Validation error
+
+  /posts/applications/my-applications:
+    get:
+      tags:
+        - Posts
+      summary: Get my applications
+      description: Get all applications submitted by the current user
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, accepted, rejected, withdrawn]
+      responses:
+        '200':
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Get post by ID
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Post details
+        '404':
+          description: Post not found
+
+    put:
+      tags:
+        - Posts
+      summary: Update post
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: Post updated
+
+    delete:
+      tags:
+        - Posts
+      summary: Delete post
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Post deleted
+
+  /posts/{id}/like:
+    post:
+      tags:
+        - Posts
+      summary: Toggle like
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Like toggled
+
+  /posts/{id}/comment:
+    post:
+      tags:
+        - Posts
+      summary: Add comment
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment added
+
+  /posts/{id}/comments:
+    get:
+      tags:
+        - Posts
+      summary: Get comments
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+
+  /posts/{id}/apply:
+    post:
+      tags:
+        - Posts
+      summary: Apply to project
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyToProjectRequest'
+      responses:
+        '201':
+          description: Application submitted
+
+  /posts/{id}/applications:
+    get:
+      tags:
+        - Posts
+      summary: Get project applications
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of applications
+
+  /posts/{id}/application-status:
+    get:
+      tags:
+        - Posts
+      summary: Check application status
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Application status
+
+  /posts/applications/{applicationId}/status:
+    put:
+      tags:
+        - Posts
+      summary: Update application status
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApplicationStatusRequest'
+      responses:
+        '200':
+          description: Status updated
+
+  /posts/applications/{applicationId}:
+    delete:
+      tags:
+        - Posts
+      summary: Remove application
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Application removed
+
+  # Projects
+  /projects:
+    get:
+      tags:
+        - Projects
+      summary: List projects
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: profileId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of projects
+
+    post:
+      tags:
+        - Projects
+      summary: Create project
+      description: Recruiters and admins only
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created
+        '403':
+          description: Forbidden - Recruiters only
+
+  /projects/{id}:
+    get:
+      tags:
+        - Projects
+      summary: Get project by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Project details
+
+  /projects/{id}/members:
+    get:
+      tags:
+        - Projects
+      summary: Get project members
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of members
+
+    post:
+      tags:
+        - Projects
+      summary: Add project member
+      description: Recruiters and admins only
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddProjectMemberRequest'
+      responses:
+        '201':
+          description: Member added
+
+  # Chat
+  /conversations:
+    get:
+      tags:
+        - Chat
+      summary: List conversations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: profileId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of conversations
+
+    post:
+      tags:
+        - Chat
+      summary: Create conversation
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationRequest'
+      responses:
+        '201':
+          description: Conversation created
+
+  /conversations/{id}:
+    get:
+      tags:
+        - Chat
+      summary: Get conversation by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conversation details
+
+  /conversations/{id}/messages:
+    get:
+      tags:
+        - Chat
+      summary: Get messages
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 40
+      responses:
+        '200':
+          description: List of messages
+
+    post:
+      tags:
+        - Chat
+      summary: Send message
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '201':
+          description: Message sent
+
+  /conversations/{id}/typing:
+    post:
+      tags:
+        - Chat
+      summary: Update typing status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTypingRequest'
+      responses:
+        '200':
+          description: Typing status updated
+
+  /conversations/{id}/presence:
+    post:
+      tags:
+        - Chat
+      summary: Update presence
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Presence updated
+
+  # Schedules
+  /schedules:
+    get:
+      tags:
+        - Schedules
+      summary: List schedules
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: profileId
+          in: query
+          schema:
+            type: string
+        - name: projectId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of schedules
+
+    post:
+      tags:
+        - Schedules
+      summary: Create schedule
+      description: Recruiters and admins only
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleRequest'
+      responses:
+        '201':
+          description: Schedule created
+
+  /schedules/recruiter/projects:
+    get:
+      tags:
+        - Schedules
+      summary: Get recruiter projects
+      description: Get projects owned by the current recruiter
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: List of projects
+        '403':
+          description: Forbidden - Recruiters only
+
+  /schedules/{id}:
+    get:
+      tags:
+        - Schedules
+      summary: Get schedule by ID
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Schedule details
+
+  /schedules/{id}/members:
+    get:
+      tags:
+        - Schedules
+      summary: Get schedule members
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of members
+
+    post:
+      tags:
+        - Schedules
+      summary: Add schedule member
+      description: Recruiters and admins only
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddScheduleMemberRequest'
+      responses:
+        '201':
+          description: Member added
+
+  /schedules/{scheduleId}/members/{profileId}/status:
+    put:
+      tags:
+        - Schedules
+      summary: Update member status
+      description: Update your own status for a schedule
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateScheduleMemberStatusRequest'
+      responses:
+        '200':
+          description: Status updated
+
+  # Uploads
+  /uploads:
+    post:
+      tags:
+        - Uploads
+      summary: Upload file
+      description: Upload an image file (max 6MB)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  publicUrl:
+                    type: string
+                  url:
+                    type: string
+        '400':
+          description: Invalid file
+
+  # Notifications
+  /notifications/save-token:
+    post:
+      tags:
+        - Notifications
+      summary: Save push token
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveTokenRequest'
+      responses:
+        '200':
+          description: Token saved
+
+  /notifications/revoke-token:
+    post:
+      tags:
+        - Notifications
+      summary: Revoke push token
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeTokenRequest'
+      responses:
+        '200':
+          description: Token revoked
+
+  /notifications/my-devices:
+    get:
+      tags:
+        - Notifications
+      summary: List my devices
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of devices
+
+  /notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: Send push notification
+      description: Admin only
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendPushRequest'
+      responses:
+        '200':
+          description: Notification sent
+        '403':
+          description: Forbidden - Admin only
+
+  # Admin
+  /admin/stats:
+    get:
+      tags:
+        - Admin
+      summary: Get admin stats
+      description: Admin and superadmin only
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Admin statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    type: object
+                  metrics:
+                    type: object
+                    properties:
+                      users:
+                        type: integer
+                      posts:
+                        type: integer
+                      projects:
+                        type: integer
+        '403':
+          description: Forbidden - Admin only

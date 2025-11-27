@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24Krafts API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css">
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+    }
+
+    .swagger-ui .topbar {
+      display: none;
+    }
+
+    .swagger-ui .info {
+      margin: 30px 0;
+    }
+
+    .swagger-ui .info .title {
+      font-size: 2.5rem;
+      color: #3b4151;
+    }
+
+    .swagger-ui .info .description p {
+      font-size: 1rem;
+      color: #3b4151;
+    }
+
+    .swagger-ui .scheme-container {
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .swagger-ui .opblock-tag {
+      font-size: 1.3rem;
+      font-weight: 600;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 15px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .swagger-ui .opblock-tag:hover {
+      background: #f8f8f8;
+    }
+
+    .swagger-ui .opblock {
+      margin: 0 0 10px 0;
+      border-radius: 4px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+
+    .swagger-ui .opblock .opblock-summary {
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+
+    .swagger-ui .opblock .opblock-summary-method {
+      font-size: 14px;
+      font-weight: 700;
+      min-width: 80px;
+      padding: 6px 15px;
+      text-align: center;
+      border-radius: 3px;
+    }
+
+    .swagger-ui .opblock.opblock-get .opblock-summary-method {
+      background: #61affe;
+    }
+
+    .swagger-ui .opblock.opblock-post .opblock-summary-method {
+      background: #49cc90;
+    }
+
+    .swagger-ui .opblock.opblock-put .opblock-summary-method {
+      background: #fca130;
+    }
+
+    .swagger-ui .opblock.opblock-delete .opblock-summary-method {
+      background: #f93e3e;
+    }
+
+    .swagger-ui .opblock .opblock-summary-path {
+      font-size: 14px;
+      font-weight: 600;
+      font-family: monospace;
+    }
+
+    .swagger-ui .opblock .opblock-summary-description {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .swagger-ui .btn.execute {
+      background-color: #4990e2;
+      border-color: #4990e2;
+      color: #fff;
+      font-weight: 700;
+      padding: 8px 40px;
+    }
+
+    .swagger-ui .btn.execute:hover {
+      background-color: #357abd;
+    }
+
+    .swagger-ui .btn.try-out__btn {
+      border: 2px solid #6c757d;
+      color: #6c757d;
+      background: transparent;
+      padding: 8px 20px;
+      font-weight: 600;
+    }
+
+    .swagger-ui .btn.try-out__btn:hover {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    .swagger-ui .btn.try-out__btn.cancel {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+
+    .swagger-ui .btn.try-out__btn.cancel:hover {
+      background: #dc3545;
+      color: #fff;
+    }
+
+    .swagger-ui .authorization__btn {
+      background: #49cc90;
+      border-color: #49cc90;
+      color: #fff;
+    }
+
+    .swagger-ui .auth-wrapper .authorize {
+      padding-right: 20px;
+    }
+
+    .swagger-ui .model-box {
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .swagger-ui section.models {
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+    }
+
+    .swagger-ui .response-col_status {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .swagger-ui table tbody tr td {
+      padding: 10px;
+    }
+
+    .swagger-ui .parameter__name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .swagger-ui .parameter__type {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .swagger-ui textarea {
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .swagger-ui .opblock-body pre {
+      font-size: 13px;
+      background: #2d2d2d;
+      color: #f8f8f2;
+      border-radius: 4px;
+    }
+
+    .swagger-ui .responses-inner {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    // Embedded OpenAPI Specification
+    const spec = {
+      "openapi": "3.0.3",
+      "info": {
+        "title": "24Krafts API",
+        "version": "1.0.0",
+        "description": "Complete API documentation for the 24Krafts mobile application.\n\n## Authentication\nThis API uses two authentication methods:\n- **Session Auth**: `Authorization: Session <session_id>` - Used for most endpoints\n- **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for some endpoints\n\n## Base URL\n`https://24-krafts-backend.vercel.app/api`\n\n## Getting Started\n1. Send OTP using `/auth/send-otp`\n2. Login using `/auth/session/login`\n3. Use the session token in subsequent requests"
+      },
+      "servers": [
+        {
+          "url": "https://24-krafts-backend.vercel.app/api",
+          "description": "Production Server"
+        }
+      ],
+      "tags": [
+        {"name": "Health", "description": "Health check endpoints"},
+        {"name": "Auth", "description": "Authentication and session management"},
+        {"name": "Users", "description": "User management"},
+        {"name": "Profiles", "description": "Profile management"},
+        {"name": "Posts", "description": "Posts and project applications"},
+        {"name": "Projects", "description": "Project management"},
+        {"name": "Chat", "description": "Conversations and messaging"},
+        {"name": "Schedules", "description": "Schedule management"},
+        {"name": "Uploads", "description": "File uploads"},
+        {"name": "Notifications", "description": "Push notification management"},
+        {"name": "Admin", "description": "Admin endpoints"}
+      ],
+      "components": {
+        "securitySchemes": {
+          "SessionAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Session token: Session <session_id>"
+          },
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          }
+        },
+        "schemas": {
+          "SendOtpRequest": {
+            "type": "object",
+            "required": ["phone"],
+            "properties": {
+              "phone": {"type": "string", "example": "9876543210", "description": "10-digit Indian mobile number"}
+            }
+          },
+          "VerifyOtpRequest": {
+            "type": "object",
+            "required": ["phone", "otp"],
+            "properties": {
+              "phone": {"type": "string", "example": "9876543210"},
+              "otp": {"type": "string", "example": "123456", "minLength": 6, "maxLength": 6}
+            }
+          },
+          "SessionLoginRequest": {
+            "type": "object",
+            "required": ["phone", "otp"],
+            "properties": {
+              "phone": {"type": "string", "example": "9876543210"},
+              "otp": {"type": "string", "example": "123456"},
+              "deviceInfo": {"type": "string", "example": "Web Browser"}
+            }
+          },
+          "SignupRequest": {
+            "type": "object",
+            "required": ["phone", "otp", "firstName", "email", "gender", "department", "state", "city", "role", "aadharNumber"],
+            "properties": {
+              "phone": {"type": "string", "example": "9876543210"},
+              "otp": {"type": "string", "example": "123456"},
+              "firstName": {"type": "string", "example": "John"},
+              "lastName": {"type": "string", "example": "Doe"},
+              "email": {"type": "string", "format": "email", "example": "john@example.com"},
+              "alternativePhone": {"type": "string"},
+              "maaAssociativeNumber": {"type": "string"},
+              "gender": {"type": "string", "enum": ["Male", "Female", "Non-binary", "Prefer not to say"]},
+              "department": {"type": "string", "example": "Acting"},
+              "state": {"type": "string", "example": "Maharashtra"},
+              "city": {"type": "string", "example": "Mumbai"},
+              "profilePhoto": {"type": "string", "description": "Base64 encoded image"},
+              "role": {"type": "string", "enum": ["artist", "recruiter"]},
+              "companyName": {"type": "string"},
+              "companyPhone": {"type": "string"},
+              "companyEmail": {"type": "string"},
+              "companyLogo": {"type": "string"},
+              "website": {"type": "string"},
+              "facebook": {"type": "string"},
+              "twitter": {"type": "string"},
+              "instagram": {"type": "string"},
+              "youtube": {"type": "string"},
+              "customLinks": {"type": "array", "items": {"type": "string"}},
+              "aadharNumber": {"type": "string", "minLength": 16, "maxLength": 16, "example": "1234567890123456"},
+              "bio": {"type": "string"}
+            }
+          },
+          "UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+              "first_name": {"type": "string"},
+              "last_name": {"type": "string"},
+              "email": {"type": "string"},
+              "phone": {"type": "string"},
+              "alt_phone": {"type": "string"},
+              "maa_associative_number": {"type": "string"},
+              "gender": {"type": "string"},
+              "department": {"type": "string"},
+              "state": {"type": "string"},
+              "city": {"type": "string"},
+              "bio": {"type": "string"},
+              "profile_photo_url": {"type": "string"},
+              "company_id": {"type": "string", "format": "uuid"}
+            }
+          },
+          "BecomeRecruiterRequest": {
+            "type": "object",
+            "required": ["companyName"],
+            "properties": {
+              "companyName": {"type": "string"},
+              "companyPhone": {"type": "string"},
+              "companyEmail": {"type": "string"},
+              "companyLogo": {"type": "string"}
+            }
+          },
+          "UpgradePremiumRequest": {
+            "type": "object",
+            "required": ["planType"],
+            "properties": {
+              "planType": {"type": "string", "enum": ["monthly", "yearly"]},
+              "paymentId": {"type": "string"}
+            }
+          },
+          "CreatePostRequest": {
+            "type": "object",
+            "required": ["title", "description"],
+            "properties": {
+              "title": {"type": "string", "example": "Looking for actors"},
+              "description": {"type": "string", "example": "We need talented actors for our upcoming project"},
+              "requirements": {"type": "string"},
+              "location": {"type": "string"},
+              "department": {"type": "string"},
+              "departments": {"type": "array", "items": {"type": "string"}},
+              "deadline": {"type": "string", "format": "date-time"},
+              "image": {"type": "string", "description": "Base64 encoded image"},
+              "caption": {"type": "string"},
+              "status": {"type": "string", "enum": ["open", "closed", "in_progress", "completed"]}
+            }
+          },
+          "UpdatePostRequest": {
+            "type": "object",
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "requirements": {"type": "string"},
+              "location": {"type": "string"},
+              "department": {"type": "string"},
+              "departments": {"type": "array", "items": {"type": "string"}},
+              "deadline": {"type": "string", "format": "date-time"},
+              "status": {"type": "string", "enum": ["open", "closed", "in_progress", "completed"]}
+            }
+          },
+          "CreateCommentRequest": {
+            "type": "object",
+            "required": ["content"],
+            "properties": {
+              "content": {"type": "string", "example": "Great opportunity!"}
+            }
+          },
+          "ApplyToProjectRequest": {
+            "type": "object",
+            "properties": {
+              "cover_letter": {"type": "string"},
+              "portfolio_link": {"type": "string"}
+            }
+          },
+          "UpdateApplicationStatusRequest": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": {"type": "string", "enum": ["pending", "accepted", "rejected", "withdrawn"]}
+            }
+          },
+          "CreateProjectRequest": {
+            "type": "object",
+            "required": ["title"],
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "image": {"type": "string"},
+              "start_date": {"type": "string", "format": "date"},
+              "end_date": {"type": "string", "format": "date"}
+            }
+          },
+          "AddProjectMemberRequest": {
+            "type": "object",
+            "required": ["profile_id"],
+            "properties": {
+              "profile_id": {"type": "string", "format": "uuid"},
+              "role_in_project": {"type": "string"}
+            }
+          },
+          "CreateConversationRequest": {
+            "type": "object",
+            "required": ["member_ids"],
+            "properties": {
+              "is_group": {"type": "boolean", "default": false},
+              "name": {"type": "string"},
+              "member_ids": {"type": "array", "items": {"type": "string", "format": "uuid"}}
+            }
+          },
+          "SendMessageRequest": {
+            "type": "object",
+            "required": ["content"],
+            "properties": {
+              "content": {"type": "string", "example": "Hello!"},
+              "metadata": {"type": "object"},
+              "client_msg_id": {"type": "string"}
+            }
+          },
+          "UpdateTypingRequest": {
+            "type": "object",
+            "required": ["is_typing"],
+            "properties": {
+              "is_typing": {"type": "boolean"}
+            }
+          },
+          "CreateScheduleRequest": {
+            "type": "object",
+            "required": ["project_id", "date"],
+            "properties": {
+              "project_id": {"type": "string", "format": "uuid"},
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "date": {"type": "string", "format": "date"},
+              "start_time": {"type": "string", "example": "09:00"},
+              "end_time": {"type": "string", "example": "17:00"},
+              "location": {"type": "string"}
+            }
+          },
+          "AddScheduleMemberRequest": {
+            "type": "object",
+            "required": ["profile_id"],
+            "properties": {
+              "profile_id": {"type": "string", "format": "uuid"}
+            }
+          },
+          "UpdateScheduleMemberStatusRequest": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": {"type": "string", "enum": ["accepted", "declined", "pending"]}
+            }
+          },
+          "SaveTokenRequest": {
+            "type": "object",
+            "required": ["token", "platform"],
+            "properties": {
+              "token": {"type": "string"},
+              "platform": {"type": "string", "enum": ["ios", "android"]},
+              "device_name": {"type": "string"},
+              "app_version": {"type": "string"},
+              "os_version": {"type": "string"},
+              "timezone": {"type": "string"}
+            }
+          },
+          "RevokeTokenRequest": {
+            "type": "object",
+            "required": ["token"],
+            "properties": {
+              "token": {"type": "string"}
+            }
+          },
+          "SendPushRequest": {
+            "type": "object",
+            "required": ["tokens", "title", "body"],
+            "properties": {
+              "tokens": {"type": "array", "items": {"type": "string"}},
+              "title": {"type": "string"},
+              "body": {"type": "string"},
+              "data": {
+                "type": "object",
+                "properties": {
+                  "route": {"type": "string"},
+                  "id": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "paths": {
+        "/health": {
+          "get": {
+            "tags": ["Health"],
+            "summary": "Health check",
+            "description": "Check if the API server is running and healthy",
+            "responses": {
+              "200": {
+                "description": "API is healthy",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "status": {"type": "string", "example": "ok"},
+                        "timestamp": {"type": "string", "example": "2024-01-15T10:30:00.000Z"},
+                        "service": {"type": "string", "example": "24Krafts Backend API"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/auth/send-otp": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Send OTP",
+            "description": "Send a 6-digit OTP to the provided Indian mobile number via SMS",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SendOtpRequest"},
+                  "example": {"phone": "9876543210"}
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "OTP sent successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": {"type": "boolean", "example": true},
+                        "message": {"type": "string", "example": "OTP sent successfully"},
+                        "phoneNumber": {"type": "string", "example": "9876543210"},
+                        "userExists": {"type": "boolean", "example": false}
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {"description": "Invalid phone number format"}
+            }
+          }
+        },
+        "/auth/verify-otp": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Verify OTP",
+            "description": "Verify the OTP sent to phone number. Returns isNewUser: true if signup is required.",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/VerifyOtpRequest"},
+                  "example": {"phone": "9876543210", "otp": "123456"}
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "OTP verified",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": {"type": "boolean"},
+                        "isNewUser": {"type": "boolean"},
+                        "token": {"type": "string"},
+                        "user": {"type": "object"}
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {"description": "Invalid or expired OTP"}
+            }
+          }
+        },
+        "/auth/signup": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Complete signup",
+            "description": "Register a new user with all required details after OTP verification",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SignupRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "User registered successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": {"type": "boolean"},
+                        "token": {"type": "string"},
+                        "user": {"type": "object"},
+                        "profile": {"type": "object"}
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {"description": "Validation error"}
+            }
+          }
+        },
+        "/auth/profile": {
+          "get": {
+            "tags": ["Auth"],
+            "summary": "Get current user profile",
+            "description": "Get the authenticated user's profile details",
+            "security": [{"BearerAuth": []}],
+            "responses": {
+              "200": {"description": "User profile returned"},
+              "401": {"description": "Unauthorized"}
+            }
+          }
+        },
+        "/auth/cleanup-otps": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Cleanup expired OTPs",
+            "description": "Remove expired OTP records from database (maintenance endpoint)",
+            "responses": {
+              "200": {"description": "Cleanup successful"}
+            }
+          }
+        },
+        "/auth/session/login": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Session login",
+            "description": "Login with phone and OTP to create a persistent session. Returns session ID for subsequent requests.",
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SessionLoginRequest"},
+                  "example": {"phone": "9876543210", "otp": "123456", "deviceInfo": "Web Browser"}
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Login successful",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": {"type": "boolean", "example": true},
+                        "sessionId": {"type": "string", "example": "abc123-session-id"},
+                        "user": {"type": "object"},
+                        "profile": {"type": "object"}
+                      }
+                    }
+                  }
+                }
+              },
+              "401": {"description": "Invalid OTP or phone"}
+            }
+          }
+        },
+        "/auth/session/validate": {
+          "get": {
+            "tags": ["Auth"],
+            "summary": "Validate session",
+            "description": "Check if the current session token is valid",
+            "security": [{"SessionAuth": []}],
+            "responses": {
+              "200": {
+                "description": "Session is valid",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "valid": {"type": "boolean", "example": true},
+                        "user": {"type": "object"},
+                        "role": {"type": "string", "example": "artist"}
+                      }
+                    }
+                  }
+                }
+              },
+              "401": {"description": "Invalid session"}
+            }
+          }
+        },
+        "/auth/session/logout": {
+          "post": {
+            "tags": ["Auth"],
+            "summary": "Session logout",
+            "description": "Invalidate the current session",
+            "security": [{"SessionAuth": []}],
+            "responses": {
+              "200": {"description": "Logout successful"}
+            }
+          }
+        },
+        "/users/{id}": {
+          "get": {
+            "tags": ["Users"],
+            "summary": "Get user by ID",
+            "description": "Retrieve user details by their UUID",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "User found"},
+              "404": {"description": "User not found"}
+            }
+          }
+        },
+        "/profiles": {
+          "get": {
+            "tags": ["Profiles"],
+            "summary": "List all profiles",
+            "description": "Get paginated list of all user profiles",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}, "description": "Pagination cursor"},
+              {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 20}, "description": "Number of results"},
+              {"name": "role", "in": "query", "schema": {"type": "string", "enum": ["artist", "recruiter"]}, "description": "Filter by role"}
+            ],
+            "responses": {
+              "200": {
+                "description": "List of profiles",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "data": {"type": "array", "items": {"type": "object"}},
+                        "nextCursor": {"type": "string"},
+                        "hasMore": {"type": "boolean"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/profiles/{id}": {
+          "get": {
+            "tags": ["Profiles"],
+            "summary": "Get profile by ID",
+            "description": "Get detailed profile information",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Profile details"},
+              "404": {"description": "Profile not found"}
+            }
+          },
+          "put": {
+            "tags": ["Profiles"],
+            "summary": "Update profile",
+            "description": "Update your own profile (can only update your own)",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpdateProfileRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Profile updated"},
+              "401": {"description": "Unauthorized"},
+              "403": {"description": "Cannot update others profile"}
+            }
+          }
+        },
+        "/profiles/{id}/become-recruiter": {
+          "post": {
+            "tags": ["Profiles"],
+            "summary": "Become a recruiter",
+            "description": "Upgrade from artist to recruiter role",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/BecomeRecruiterRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Upgraded to recruiter"},
+              "401": {"description": "Unauthorized"}
+            }
+          }
+        },
+        "/profiles/{id}/upgrade-premium": {
+          "post": {
+            "tags": ["Profiles"],
+            "summary": "Upgrade to premium",
+            "description": "Upgrade account to premium subscription",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpgradePremiumRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Upgraded to premium"}
+            }
+          }
+        },
+        "/posts": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "List all posts",
+            "description": "Get paginated list of posts/projects",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 20}},
+              {"name": "profileId", "in": "query", "schema": {"type": "string"}, "description": "Filter by author"},
+              {"name": "role", "in": "query", "schema": {"type": "string"}},
+              {"name": "department", "in": "query", "schema": {"type": "string"}}
+            ],
+            "responses": {
+              "200": {"description": "List of posts"}
+            }
+          },
+          "post": {
+            "tags": ["Posts"],
+            "summary": "Create a new post",
+            "description": "Create a new post or project listing",
+            "security": [{"SessionAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/CreatePostRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Post created"},
+              "400": {"description": "Validation error"}
+            }
+          }
+        },
+        "/posts/applications/my-applications": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "Get my applications",
+            "description": "Get all project applications submitted by current user",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+              {"name": "status", "in": "query", "schema": {"type": "string", "enum": ["pending", "accepted", "rejected", "withdrawn"]}}
+            ],
+            "responses": {
+              "200": {"description": "List of applications"}
+            }
+          }
+        },
+        "/posts/{id}": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "Get post by ID",
+            "description": "Get detailed post information",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Post details"},
+              "404": {"description": "Post not found"}
+            }
+          },
+          "put": {
+            "tags": ["Posts"],
+            "summary": "Update post",
+            "description": "Update your own post",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpdatePostRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Post updated"}
+            }
+          },
+          "delete": {
+            "tags": ["Posts"],
+            "summary": "Delete post",
+            "description": "Delete your own post",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Post deleted"}
+            }
+          }
+        },
+        "/posts/{id}/like": {
+          "post": {
+            "tags": ["Posts"],
+            "summary": "Toggle like",
+            "description": "Like or unlike a post",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Like toggled"}
+            }
+          }
+        },
+        "/posts/{id}/comment": {
+          "post": {
+            "tags": ["Posts"],
+            "summary": "Add comment",
+            "description": "Add a comment to a post",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/CreateCommentRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Comment added"}
+            }
+          }
+        },
+        "/posts/{id}/comments": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "Get comments",
+            "description": "Get all comments on a post",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}}
+            ],
+            "responses": {
+              "200": {"description": "List of comments"}
+            }
+          }
+        },
+        "/posts/{id}/apply": {
+          "post": {
+            "tags": ["Posts"],
+            "summary": "Apply to project",
+            "description": "Submit an application to a project posting",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/ApplyToProjectRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Application submitted"}
+            }
+          }
+        },
+        "/posts/{id}/applications": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "Get project applications",
+            "description": "Get all applications for a project (recruiter view)",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+              {"name": "status", "in": "query", "schema": {"type": "string"}}
+            ],
+            "responses": {
+              "200": {"description": "List of applications"}
+            }
+          }
+        },
+        "/posts/{id}/application-status": {
+          "get": {
+            "tags": ["Posts"],
+            "summary": "Check application status",
+            "description": "Check if you have applied to this project",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Application status"}
+            }
+          }
+        },
+        "/posts/applications/{applicationId}/status": {
+          "put": {
+            "tags": ["Posts"],
+            "summary": "Update application status",
+            "description": "Accept or reject an application (recruiter only)",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpdateApplicationStatusRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Status updated"}
+            }
+          }
+        },
+        "/posts/applications/{applicationId}": {
+          "delete": {
+            "tags": ["Posts"],
+            "summary": "Remove application",
+            "description": "Withdraw your application or remove as recruiter",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Application removed"}
+            }
+          }
+        },
+        "/projects": {
+          "get": {
+            "tags": ["Projects"],
+            "summary": "List projects",
+            "description": "Get paginated list of projects",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+              {"name": "profileId", "in": "query", "schema": {"type": "string"}}
+            ],
+            "responses": {
+              "200": {"description": "List of projects"}
+            }
+          },
+          "post": {
+            "tags": ["Projects"],
+            "summary": "Create project",
+            "description": "Create a new project (Recruiters and admins only)",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/CreateProjectRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Project created"},
+              "403": {"description": "Forbidden - Recruiters only"}
+            }
+          }
+        },
+        "/projects/{id}": {
+          "get": {
+            "tags": ["Projects"],
+            "summary": "Get project by ID",
+            "description": "Get project details",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Project details"}
+            }
+          }
+        },
+        "/projects/{id}/members": {
+          "get": {
+            "tags": ["Projects"],
+            "summary": "Get project members",
+            "description": "List all members of a project",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "List of members"}
+            }
+          },
+          "post": {
+            "tags": ["Projects"],
+            "summary": "Add project member",
+            "description": "Add a member to project (Recruiters and admins only)",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/AddProjectMemberRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Member added"}
+            }
+          }
+        },
+        "/conversations": {
+          "get": {
+            "tags": ["Chat"],
+            "summary": "List conversations",
+            "description": "Get all conversations for a profile",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "profileId", "in": "query", "required": true, "schema": {"type": "string"}},
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}}
+            ],
+            "responses": {
+              "200": {"description": "List of conversations"}
+            }
+          },
+          "post": {
+            "tags": ["Chat"],
+            "summary": "Create conversation",
+            "description": "Start a new conversation with one or more users",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/CreateConversationRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Conversation created"}
+            }
+          }
+        },
+        "/conversations/{id}": {
+          "get": {
+            "tags": ["Chat"],
+            "summary": "Get conversation",
+            "description": "Get conversation details",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Conversation details"}
+            }
+          }
+        },
+        "/conversations/{id}/messages": {
+          "get": {
+            "tags": ["Chat"],
+            "summary": "Get messages",
+            "description": "Get messages in a conversation",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 40}}
+            ],
+            "responses": {
+              "200": {"description": "List of messages"}
+            }
+          },
+          "post": {
+            "tags": ["Chat"],
+            "summary": "Send message",
+            "description": "Send a message in a conversation",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SendMessageRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Message sent"}
+            }
+          }
+        },
+        "/conversations/{id}/typing": {
+          "post": {
+            "tags": ["Chat"],
+            "summary": "Update typing status",
+            "description": "Indicate typing status in a conversation",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpdateTypingRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Typing status updated"}
+            }
+          }
+        },
+        "/conversations/{id}/presence": {
+          "post": {
+            "tags": ["Chat"],
+            "summary": "Update presence",
+            "description": "Update online presence in a conversation",
+            "security": [{"BearerAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Presence updated"}
+            }
+          }
+        },
+        "/schedules": {
+          "get": {
+            "tags": ["Schedules"],
+            "summary": "List schedules",
+            "description": "Get paginated list of schedules",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+              {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+              {"name": "profileId", "in": "query", "schema": {"type": "string"}},
+              {"name": "projectId", "in": "query", "schema": {"type": "string"}}
+            ],
+            "responses": {
+              "200": {"description": "List of schedules"}
+            }
+          },
+          "post": {
+            "tags": ["Schedules"],
+            "summary": "Create schedule",
+            "description": "Create a new schedule (Recruiters and admins only)",
+            "security": [{"SessionAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/CreateScheduleRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Schedule created"}
+            }
+          }
+        },
+        "/schedules/recruiter/projects": {
+          "get": {
+            "tags": ["Schedules"],
+            "summary": "Get recruiter projects",
+            "description": "Get projects owned by the current recruiter",
+            "security": [{"SessionAuth": []}],
+            "responses": {
+              "200": {"description": "List of projects"},
+              "403": {"description": "Forbidden - Recruiters only"}
+            }
+          }
+        },
+        "/schedules/{id}": {
+          "get": {
+            "tags": ["Schedules"],
+            "summary": "Get schedule by ID",
+            "description": "Get schedule details",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "Schedule details"}
+            }
+          }
+        },
+        "/schedules/{id}/members": {
+          "get": {
+            "tags": ["Schedules"],
+            "summary": "Get schedule members",
+            "description": "List all members of a schedule",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "responses": {
+              "200": {"description": "List of members"}
+            }
+          },
+          "post": {
+            "tags": ["Schedules"],
+            "summary": "Add schedule member",
+            "description": "Add a member to schedule (Recruiters and admins only)",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/AddScheduleMemberRequest"}
+                }
+              }
+            },
+            "responses": {
+              "201": {"description": "Member added"}
+            }
+          }
+        },
+        "/schedules/{scheduleId}/members/{profileId}/status": {
+          "put": {
+            "tags": ["Schedules"],
+            "summary": "Update member status",
+            "description": "Update your own status for a schedule (accept/decline)",
+            "security": [{"SessionAuth": []}],
+            "parameters": [
+              {"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+              {"name": "profileId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/UpdateScheduleMemberStatusRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Status updated"}
+            }
+          }
+        },
+        "/uploads": {
+          "post": {
+            "tags": ["Uploads"],
+            "summary": "Upload file",
+            "description": "Upload an image file (max 6MB, images only)",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "multipart/form-data": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "file": {"type": "string", "format": "binary"}
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Upload successful",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "success": {"type": "boolean"},
+                        "publicUrl": {"type": "string"},
+                        "url": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {"description": "Invalid file"}
+            }
+          }
+        },
+        "/notifications/save-token": {
+          "post": {
+            "tags": ["Notifications"],
+            "summary": "Save push token",
+            "description": "Register device for push notifications",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SaveTokenRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Token saved"}
+            }
+          }
+        },
+        "/notifications/revoke-token": {
+          "post": {
+            "tags": ["Notifications"],
+            "summary": "Revoke push token",
+            "description": "Unregister device from push notifications",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/RevokeTokenRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Token revoked"}
+            }
+          }
+        },
+        "/notifications/my-devices": {
+          "get": {
+            "tags": ["Notifications"],
+            "summary": "List my devices",
+            "description": "Get all registered devices for push notifications",
+            "security": [{"BearerAuth": []}],
+            "responses": {
+              "200": {"description": "List of devices"}
+            }
+          }
+        },
+        "/notifications/send": {
+          "post": {
+            "tags": ["Notifications"],
+            "summary": "Send push notification",
+            "description": "Send push notification to devices (Admin only)",
+            "security": [{"BearerAuth": []}],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {"$ref": "#/components/schemas/SendPushRequest"}
+                }
+              }
+            },
+            "responses": {
+              "200": {"description": "Notification sent"},
+              "403": {"description": "Forbidden - Admin only"}
+            }
+          }
+        },
+        "/admin/stats": {
+          "get": {
+            "tags": ["Admin"],
+            "summary": "Get admin stats",
+            "description": "Get platform statistics (Admin and superadmin only)",
+            "security": [{"BearerAuth": []}],
+            "responses": {
+              "200": {
+                "description": "Admin statistics",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "message": {"type": "string"},
+                        "user": {"type": "object"},
+                        "metrics": {
+                          "type": "object",
+                          "properties": {
+                            "users": {"type": "integer"},
+                            "posts": {"type": "integer"},
+                            "projects": {"type": "integer"}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "403": {"description": "Forbidden - Admin only"}
+            }
+          }
+        }
+      }
+    };
+
+    // Initialize Swagger UI with embedded spec
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        spec: spec,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        docExpansion: 'list',
+        filter: true,
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: true,
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        validatorUrl: null
+      });
+
+      window.ui = ui;
+    };
+  </script>
+</body>
+</html>
