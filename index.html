@@ -280,10 +280,6 @@
   <!-- Quick Info Bar -->
   <div class="quick-info">
     <div class="item">
-      <span class="label">Session Auth:</span>
-      <code>Authorization: Session &lt;id&gt;</code>
-    </div>
-    <div class="item">
       <span class="label">JWT Auth:</span>
       <code>Authorization: Bearer &lt;token&gt;</code>
     </div>
@@ -300,7 +296,7 @@
       "info": {
         "title": "24Krafts API",
         "version": "1.0.0",
-        "description": "Complete API documentation for the 24Krafts mobile application.\n\n## Authentication\nThis API uses two authentication methods:\n- **Session Auth**: `Authorization: Session <session_id>` - Used for most endpoints\n- **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for some endpoints\n\n## Base URL\n`https://24-krafts-backend.vercel.app/api`\n\n## Getting Started\n1. Send OTP using `/auth/send-otp`\n2. Login using `/auth/session/login`\n3. Use the session token in subsequent requests"
+        "description": "Complete API documentation for the 24Krafts mobile application.\n\n## Authentication\nThis API uses JWT Bearer authentication:\n- **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for all authenticated endpoints\n\n## Base URL\n`https://24-krafts-backend.vercel.app/api`\n\n## Getting Started\n1. Send OTP using `/auth/send-otp`\n2. Verify OTP using `/auth/verify-otp`\n3. Use the JWT token in subsequent requests"
       },
       "servers": [
         {
@@ -310,7 +306,7 @@
       ],
       "tags": [
         {"name": "Health", "description": "Health check endpoints"},
-        {"name": "Auth", "description": "Authentication and session management"},
+        {"name": "Auth", "description": "Authentication endpoints"},
         {"name": "Users", "description": "User management"},
         {"name": "Profiles", "description": "Profile management"},
         {"name": "Posts", "description": "Posts and project applications"},
@@ -323,12 +319,6 @@
       ],
       "components": {
         "securitySchemes": {
-          "SessionAuth": {
-            "type": "apiKey",
-            "in": "header",
-            "name": "Authorization",
-            "description": "Session token: Session <session_id>"
-          },
           "BearerAuth": {
             "type": "http",
             "scheme": "bearer",
@@ -349,15 +339,6 @@
             "properties": {
               "phone": {"type": "string", "example": "9876543210"},
               "otp": {"type": "string", "example": "123456", "minLength": 6, "maxLength": 6}
-            }
-          },
-          "SessionLoginRequest": {
-            "type": "object",
-            "required": ["phone", "otp"],
-            "properties": {
-              "phone": {"type": "string", "example": "9876543210"},
-              "otp": {"type": "string", "example": "123456"},
-              "deviceInfo": {"type": "string", "example": "Web Browser"}
             }
           },
           "SignupRequest": {
@@ -736,78 +717,6 @@
             }
           }
         },
-        "/auth/session/login": {
-          "post": {
-            "tags": ["Auth"],
-            "summary": "Session login",
-            "description": "Login with phone and OTP to create a persistent session. Returns session ID for subsequent requests.",
-            "requestBody": {
-              "required": true,
-              "content": {
-                "application/json": {
-                  "schema": {"$ref": "#/components/schemas/SessionLoginRequest"},
-                  "example": {"phone": "9876543210", "otp": "123456", "deviceInfo": "Web Browser"}
-                }
-              }
-            },
-            "responses": {
-              "200": {
-                "description": "Login successful",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "success": {"type": "boolean", "example": true},
-                        "sessionId": {"type": "string", "example": "abc123-session-id"},
-                        "user": {"type": "object"},
-                        "profile": {"type": "object"}
-                      }
-                    }
-                  }
-                }
-              },
-              "401": {"description": "Invalid OTP or phone"}
-            }
-          }
-        },
-        "/auth/session/validate": {
-          "get": {
-            "tags": ["Auth"],
-            "summary": "Validate session",
-            "description": "Check if the current session token is valid",
-            "security": [{"SessionAuth": []}],
-            "responses": {
-              "200": {
-                "description": "Session is valid",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "valid": {"type": "boolean", "example": true},
-                        "user": {"type": "object"},
-                        "role": {"type": "string", "example": "artist"}
-                      }
-                    }
-                  }
-                }
-              },
-              "401": {"description": "Invalid session"}
-            }
-          }
-        },
-        "/auth/session/logout": {
-          "post": {
-            "tags": ["Auth"],
-            "summary": "Session logout",
-            "description": "Invalidate the current session",
-            "security": [{"SessionAuth": []}],
-            "responses": {
-              "200": {"description": "Logout successful"}
-            }
-          }
-        },
         "/users/{id}": {
           "get": {
             "tags": ["Users"],
@@ -828,7 +737,7 @@
             "tags": ["Profiles"],
             "summary": "List all profiles",
             "description": "Get paginated list of all user profiles",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "cursor", "in": "query", "schema": {"type": "string"}, "description": "Pagination cursor"},
               {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 20}, "description": "Number of results"},
@@ -858,7 +767,7 @@
             "tags": ["Profiles"],
             "summary": "Get profile by ID",
             "description": "Get detailed profile information",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -871,7 +780,7 @@
             "tags": ["Profiles"],
             "summary": "Update profile",
             "description": "Update your own profile (can only update your own)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -895,7 +804,7 @@
             "tags": ["Profiles"],
             "summary": "Become a recruiter",
             "description": "Upgrade from artist to recruiter role",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -918,7 +827,7 @@
             "tags": ["Profiles"],
             "summary": "Upgrade to premium",
             "description": "Upgrade account to premium subscription",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -940,7 +849,7 @@
             "tags": ["Posts"],
             "summary": "List all posts",
             "description": "Get paginated list of posts/projects",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "cursor", "in": "query", "schema": {"type": "string"}},
               {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 20}},
@@ -956,7 +865,7 @@
             "tags": ["Posts"],
             "summary": "Create a new post",
             "description": "Create a new post or project listing",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "requestBody": {
               "required": true,
               "content": {
@@ -976,7 +885,7 @@
             "tags": ["Posts"],
             "summary": "Get my applications",
             "description": "Get all project applications submitted by current user",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "cursor", "in": "query", "schema": {"type": "string"}},
               {"name": "limit", "in": "query", "schema": {"type": "integer"}},
@@ -992,7 +901,7 @@
             "tags": ["Posts"],
             "summary": "Get post by ID",
             "description": "Get detailed post information",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1005,7 +914,7 @@
             "tags": ["Posts"],
             "summary": "Update post",
             "description": "Update your own post",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1025,7 +934,7 @@
             "tags": ["Posts"],
             "summary": "Delete post",
             "description": "Delete your own post",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1039,7 +948,7 @@
             "tags": ["Posts"],
             "summary": "Toggle like",
             "description": "Like or unlike a post",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1053,7 +962,7 @@
             "tags": ["Posts"],
             "summary": "Add comment",
             "description": "Add a comment to a post",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1075,7 +984,7 @@
             "tags": ["Posts"],
             "summary": "Get comments",
             "description": "Get all comments on a post",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
               {"name": "cursor", "in": "query", "schema": {"type": "string"}},
@@ -1091,7 +1000,7 @@
             "tags": ["Posts"],
             "summary": "Apply to project",
             "description": "Submit an application to a project posting",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1112,7 +1021,7 @@
             "tags": ["Posts"],
             "summary": "Get project applications",
             "description": "Get all applications for a project (recruiter view)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
               {"name": "cursor", "in": "query", "schema": {"type": "string"}},
@@ -1129,7 +1038,7 @@
             "tags": ["Posts"],
             "summary": "Check application status",
             "description": "Check if you have applied to this project",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1143,7 +1052,7 @@
             "tags": ["Posts"],
             "summary": "Update application status",
             "description": "Accept or reject an application (recruiter only)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1165,7 +1074,7 @@
             "tags": ["Posts"],
             "summary": "Remove application",
             "description": "Withdraw your application or remove as recruiter",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "applicationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1380,7 +1289,7 @@
             "tags": ["Schedules"],
             "summary": "List schedules",
             "description": "Get paginated list of schedules",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "cursor", "in": "query", "schema": {"type": "string"}},
               {"name": "limit", "in": "query", "schema": {"type": "integer"}},
@@ -1395,7 +1304,7 @@
             "tags": ["Schedules"],
             "summary": "Create schedule",
             "description": "Create a new schedule (Recruiters and admins only)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "requestBody": {
               "required": true,
               "content": {
@@ -1414,7 +1323,7 @@
             "tags": ["Schedules"],
             "summary": "Get recruiter projects",
             "description": "Get projects owned by the current recruiter",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "responses": {
               "200": {"description": "List of projects"},
               "403": {"description": "Forbidden - Recruiters only"}
@@ -1426,7 +1335,7 @@
             "tags": ["Schedules"],
             "summary": "Get schedule by ID",
             "description": "Get schedule details",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1440,7 +1349,7 @@
             "tags": ["Schedules"],
             "summary": "Get schedule members",
             "description": "List all members of a schedule",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1452,7 +1361,7 @@
             "tags": ["Schedules"],
             "summary": "Add schedule member",
             "description": "Add a member to schedule (Recruiters and admins only)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "id", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
             ],
@@ -1474,7 +1383,7 @@
             "tags": ["Schedules"],
             "summary": "Update member status",
             "description": "Update your own status for a schedule (accept/decline)",
-            "security": [{"SessionAuth": []}],
+            "security": [{"BearerAuth": []}],
             "parameters": [
               {"name": "scheduleId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
               {"name": "profileId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}

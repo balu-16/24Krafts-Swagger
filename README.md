@@ -54,16 +54,10 @@ npx http-server swagger_docs
 
 ## Authentication
 
-The API uses two authentication methods:
-
-### Session Authentication
-Used for most endpoints (profiles, posts, schedules)
-```
-Authorization: Session <session_id>
-```
+The API uses JWT Bearer authentication for all authenticated endpoints:
 
 ### JWT Bearer Authentication
-Used for some endpoints (users, projects, chat, uploads)
+Used for all authenticated endpoints (users, profiles, posts, projects, chat, schedules, uploads)
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -71,8 +65,8 @@ Authorization: Bearer <jwt_token>
 ## Getting Started Flow
 
 1. **Send OTP** - `POST /auth/send-otp`
-2. **Verify & Login** - `POST /auth/session/login`
-3. **Use Session Token** - Include in subsequent requests
+2. **Verify OTP** - `POST /auth/verify-otp`
+3. **Use JWT Token** - Include the JWT token in subsequent requests
 
 ---
 
@@ -97,35 +91,22 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/auth/verify-otp" \
   -d '{"phone": "9876543210", "otp": "123456"}'
 ```
 
-### Session Login
-```bash
-curl -X POST "https://24-krafts-backend.vercel.app/api/auth/session/login" \
-  -H "Content-Type: application/json" \
-  -d '{"phone": "9876543210", "otp": "123456", "deviceInfo": "Web Browser"}'
-```
-
-### Validate Session
-```bash
-curl -X GET "https://24-krafts-backend.vercel.app/api/auth/session/validate" \
-  -H "Authorization: Session YOUR_SESSION_ID"
-```
-
 ### List Profiles
 ```bash
 curl -X GET "https://24-krafts-backend.vercel.app/api/profiles?limit=20" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Get Profile by ID
 ```bash
 curl -X GET "https://24-krafts-backend.vercel.app/api/profiles/PROFILE_UUID" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Update Profile
 ```bash
 curl -X PUT "https://24-krafts-backend.vercel.app/api/profiles/PROFILE_UUID" \
-  -H "Authorization: Session YOUR_SESSION_ID" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"first_name": "John", "last_name": "Doe", "bio": "Artist from Mumbai"}'
 ```
@@ -133,13 +114,13 @@ curl -X PUT "https://24-krafts-backend.vercel.app/api/profiles/PROFILE_UUID" \
 ### List Posts
 ```bash
 curl -X GET "https://24-krafts-backend.vercel.app/api/posts?limit=20" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Create Post
 ```bash
 curl -X POST "https://24-krafts-backend.vercel.app/api/posts" \
-  -H "Authorization: Session YOUR_SESSION_ID" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Looking for Actors",
@@ -153,19 +134,19 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/posts" \
 ### Get Post by ID
 ```bash
 curl -X GET "https://24-krafts-backend.vercel.app/api/posts/POST_UUID" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Like a Post
 ```bash
 curl -X POST "https://24-krafts-backend.vercel.app/api/posts/POST_UUID/like" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Add Comment
 ```bash
 curl -X POST "https://24-krafts-backend.vercel.app/api/posts/POST_UUID/comment" \
-  -H "Authorization: Session YOUR_SESSION_ID" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"content": "Great opportunity!"}'
 ```
@@ -173,7 +154,7 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/posts/POST_UUID/comment" 
 ### Apply to Project
 ```bash
 curl -X POST "https://24-krafts-backend.vercel.app/api/posts/POST_UUID/apply" \
-  -H "Authorization: Session YOUR_SESSION_ID" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"cover_letter": "I am interested in this role", "portfolio_link": "https://myportfolio.com"}'
 ```
@@ -203,13 +184,13 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/conversations/CONVERSATIO
 ### List Schedules
 ```bash
 curl -X GET "https://24-krafts-backend.vercel.app/api/schedules?limit=20" \
-  -H "Authorization: Session YOUR_SESSION_ID"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ### Create Schedule (Recruiter Only)
 ```bash
 curl -X POST "https://24-krafts-backend.vercel.app/api/schedules" \
-  -H "Authorization: Session YOUR_SESSION_ID" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "project_id": "PROJECT_UUID",
@@ -243,13 +224,13 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/notifications/save-token"
 | Category | Description | Auth Type |
 |----------|-------------|-----------|
 | Health | Health check endpoint | None |
-| Auth | Authentication & sessions | None/Session |
+| Auth | Authentication | None/JWT |
 | Users | User management | JWT |
-| Profiles | Profile CRUD | Session |
-| Posts | Posts & applications | Session |
+| Profiles | Profile CRUD | JWT |
+| Posts | Posts & applications | JWT |
 | Projects | Project management | JWT |
 | Chat | Conversations & messages | JWT |
-| Schedules | Schedule management | Session |
+| Schedules | Schedule management | JWT |
 | Uploads | File uploads | JWT |
 | Notifications | Push notifications | JWT |
 | Admin | Admin endpoints | JWT (Admin role) |
