@@ -306,7 +306,7 @@
       ],
       "tags": [
         {"name": "Health", "description": "Health check endpoints"},
-        {"name": "Auth", "description": "Authentication and session management"},
+        {"name": "Auth", "description": "Authentication endpoints"},
         {"name": "Users", "description": "User management"},
         {"name": "Profiles", "description": "Profile management"},
         {"name": "Posts", "description": "Posts and project applications"},
@@ -339,15 +339,6 @@
             "properties": {
               "phone": {"type": "string", "example": "9876543210"},
               "otp": {"type": "string", "example": "123456", "minLength": 6, "maxLength": 6}
-            }
-          },
-          "SessionLoginRequest": {
-            "type": "object",
-            "required": ["phone", "otp"],
-            "properties": {
-              "phone": {"type": "string", "example": "9876543210"},
-              "otp": {"type": "string", "example": "123456"},
-              "deviceInfo": {"type": "string", "example": "Web Browser"}
             }
           },
           "SignupRequest": {
