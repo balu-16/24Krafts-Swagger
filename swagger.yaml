@@ -5,15 +5,14 @@ info:
     Complete API documentation for the 24Krafts mobile application backend.
     
     ## Authentication
-    This API uses two authentication methods:
-    - **Session Auth**: `Authorization: Session <session_id>` - Used for most endpoints
-    - **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for some endpoints
+    This API uses JWT Bearer authentication for all authenticated endpoints:
+    - **JWT Auth**: `Authorization: Bearer <jwt_token>`
     
     ## Getting Started
     1. Send OTP to your phone number using `/auth/send-otp`
     2. Verify OTP using `/auth/verify-otp` or complete signup using `/auth/signup`
-    3. Use session login `/auth/session/login` to get a session token
-    4. Include the session token in subsequent requests
+    3. Use the JWT token received in the authentication response
+    4. Include the Bearer token in subsequent requests
   version: 1.0.0
   contact:
     name: 24Krafts Support
@@ -48,11 +47,6 @@ tags:
 
 components:
   securitySchemes:
-    SessionAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: "Session token in format: Session <session_id>"
     BearerAuth:
       type: http
       scheme: bearer
@@ -166,21 +160,6 @@ components:
           maxLength: 16
           pattern: "^\\d{16}$"
         bio:
-          type: string
-
-    SessionLoginRequest:
-      type: object
-      required:
-        - phone
-        - otp
-      properties:
-        phone:
-          type: string
-          example: "9876543210"
-        otp:
-          type: string
-          example: "123456"
-        deviceInfo:
           type: string
 
     # Profile DTOs
@@ -686,86 +665,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
 
-  /auth/session/login:
-    post:
-      tags:
-        - Auth
-      summary: Session login
-      description: Login with OTP and create a persistent session
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SessionLoginRequest'
-      responses:
-        '200':
-          description: Login successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  sessionId:
-                    type: string
-                  user:
-                    type: object
-                  profile:
-                    type: object
-        '401':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /auth/session/validate:
-    get:
-      tags:
-        - Auth
-      summary: Validate session
-      description: Validate the current session token
-      security:
-        - SessionAuth: []
-      responses:
-        '200':
-          description: Session is valid
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  valid:
-                    type: boolean
-                  user:
-                    type: object
-                  role:
-                    type: string
-        '401':
-          description: Invalid session
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /auth/session/logout:
-    post:
-      tags:
-        - Auth
-      summary: Session logout
-      description: Invalidate the current session
-      security:
-        - SessionAuth: []
-      responses:
-        '200':
-          description: Logout successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-
   # Users
   /users/{id}:
     get:
@@ -802,7 +701,7 @@ paths:
         - Profiles
       summary: List profiles
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: cursor
           in: query
@@ -832,7 +731,7 @@ paths:
         - Profiles
       summary: Get profile by ID
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -856,7 +755,7 @@ paths:
       summary: Update profile
       description: Update your own profile
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -889,7 +788,7 @@ paths:
       summary: Become a recruiter
       description: Upgrade artist account to recruiter
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -915,7 +814,7 @@ paths:
         - Profiles
       summary: Upgrade to premium
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -940,7 +839,7 @@ paths:
         - Posts
       summary: List posts
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: cursor
           in: query
@@ -976,7 +875,7 @@ paths:
         - Posts
       summary: Create post
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -996,7 +895,7 @@ paths:
       summary: Get my applications
       description: Get all applications submitted by the current user
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: cursor
           in: query
@@ -1025,7 +924,7 @@ paths:
         - Posts
       summary: Get post by ID
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1044,7 +943,7 @@ paths:
         - Posts
       summary: Update post
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1067,7 +966,7 @@ paths:
         - Posts
       summary: Delete post
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1085,7 +984,7 @@ paths:
         - Posts
       summary: Toggle like
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1103,7 +1002,7 @@ paths:
         - Posts
       summary: Add comment
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1127,7 +1026,7 @@ paths:
         - Posts
       summary: Get comments
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1157,7 +1056,7 @@ paths:
         - Posts
       summary: Apply to project
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1180,7 +1079,7 @@ paths:
         - Posts
       summary: Get project applications
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1210,7 +1109,7 @@ paths:
         - Posts
       summary: Check application status
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1228,7 +1127,7 @@ paths:
         - Posts
       summary: Update application status
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: applicationId
           in: path
@@ -1252,7 +1151,7 @@ paths:
         - Posts
       summary: Remove application
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: applicationId
           in: path
@@ -1527,7 +1426,7 @@ paths:
         - Schedules
       summary: List schedules
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: cursor
           in: query
@@ -1555,7 +1454,7 @@ paths:
       summary: Create schedule
       description: Recruiters and admins only
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -1573,7 +1472,7 @@ paths:
       summary: Get recruiter projects
       description: Get projects owned by the current recruiter
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       responses:
         '200':
           description: List of projects
@@ -1586,7 +1485,7 @@ paths:
         - Schedules
       summary: Get schedule by ID
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1604,7 +1503,7 @@ paths:
         - Schedules
       summary: Get schedule members
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1622,7 +1521,7 @@ paths:
       summary: Add schedule member
       description: Recruiters and admins only
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1647,7 +1546,7 @@ paths:
       summary: Update member status
       description: Update your own status for a schedule
       security:
-        - SessionAuth: []
+        - BearerAuth: []
       parameters:
         - name: scheduleId
           in: path
