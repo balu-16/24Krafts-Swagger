@@ -64,9 +64,27 @@ Authorization: Bearer <jwt_token>
 
 ## Getting Started Flow
 
+### For New Users
+
 1. **Send OTP** - `POST /auth/send-otp`
+   - Sends a 6-digit OTP to the provided phone number
+
 2. **Verify OTP** - `POST /auth/verify-otp`
-3. **Use JWT Token** - Include the JWT token in subsequent requests
+   - Returns `isNewUser: true` if the user needs to complete signup
+   - Returns `isNewUser: false` with JWT token for existing users
+
+3. **Complete Signup** (for new users) - `POST /auth/signup`
+   - Use the same OTP from step 1 along with user details
+   - The OTP remains valid even after verification in step 2
+   - Returns JWT token upon successful registration
+
+4. **Use JWT Token** - Include the JWT token in subsequent authenticated requests
+
+### For Existing Users
+
+1. **Send OTP** - `POST /auth/send-otp`
+2. **Verify OTP** - `POST /auth/verify-otp` (returns `isNewUser: false` with JWT token)
+3. **Use JWT Token** - Include the JWT token in subsequent authenticated requests
 
 ---
 
@@ -89,6 +107,25 @@ curl -X POST "https://24-krafts-backend.vercel.app/api/auth/send-otp" \
 curl -X POST "https://24-krafts-backend.vercel.app/api/auth/verify-otp" \
   -H "Content-Type: application/json" \
   -d '{"phone": "9876543210", "otp": "123456"}'
+```
+
+### Complete Signup (for new users)
+```bash
+curl -X POST "https://24-krafts-backend.vercel.app/api/auth/signup" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "9876543210",
+    "otp": "123456",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "gender": "male",
+    "department": "Acting",
+    "state": "Maharashtra",
+    "city": "Mumbai",
+    "role": "Talent",
+    "aadharNumber": "123456789012"
+  }'
 ```
 
 ### List Profiles

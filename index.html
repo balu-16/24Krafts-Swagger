@@ -296,7 +296,7 @@
       "info": {
         "title": "24Krafts API",
         "version": "1.0.0",
-        "description": "Complete API documentation for the 24Krafts mobile application.\n\n## Authentication\nThis API uses JWT Bearer authentication:\n- **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for all authenticated endpoints\n\n## Base URL\n`https://24-krafts-backend.vercel.app/api`\n\n## Getting Started\n1. Send OTP using `/auth/send-otp`\n2. Verify OTP using `/auth/verify-otp`\n3. Use the JWT token in subsequent requests"
+        "description": "Complete API documentation for the 24Krafts mobile application.\n\n## Authentication\nThis API uses JWT Bearer authentication:\n- **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for all authenticated endpoints\n\n## Base URL\n`https://24-krafts-backend.vercel.app/api`\n\n## Getting Started\n\n**For New Users:**\n1. Send OTP using `/auth/send-otp`\n2. Verify OTP using `/auth/verify-otp` (returns `isNewUser: true`)\n3. Complete signup with `/auth/signup` using the same OTP\n4. Use the JWT token from signup for subsequent requests\n\n**For Existing Users:**\n1. Send OTP using `/auth/send-otp`\n2. Verify OTP using `/auth/verify-otp` (returns `isNewUser: false` with JWT token)\n3. Use the JWT token for subsequent requests"
       },
       "servers": [
         {
@@ -630,7 +630,7 @@
           "post": {
             "tags": ["Auth"],
             "summary": "Verify OTP",
-            "description": "Verify the OTP sent to phone number. Returns isNewUser: true if signup is required.",
+            "description": "Verify the OTP sent to the phone number. For existing users, returns isNewUser: false with a JWT token. For new users, returns isNewUser: true indicating that /auth/signup should be called next. Note: The OTP remains valid for signup even after verification, allowing the user to proceed with /auth/signup using the same OTP.",
             "requestBody": {
               "required": true,
               "content": {
@@ -665,7 +665,7 @@
           "post": {
             "tags": ["Auth"],
             "summary": "Complete signup",
-            "description": "Register a new user with all required details after OTP verification",
+            "description": "Complete user registration with all required details. This endpoint accepts the same OTP that was sent via /auth/send-otp, even if it was already verified through /auth/verify-otp. Typical flow: 1) Call /auth/send-otp to receive an OTP, 2) Call /auth/verify-otp to verify the OTP (returns isNewUser: true for new users), 3) Call /auth/signup with the same OTP and user details to complete registration.",
             "requestBody": {
               "required": true,
               "content": {

@@ -10,10 +10,21 @@ info:
     - **JWT Auth**: `Authorization: Bearer <jwt_token>` - Used for some endpoints
     
     ## Getting Started
+    
+    **For New Users:**
     1. Send OTP to your phone number using `/auth/send-otp`
-    2. Verify OTP using `/auth/verify-otp` or complete signup using `/auth/signup`
-    3. Use session login `/auth/session/login` to get a session token
-    4. Include the session token in subsequent requests
+    2. Verify OTP using `/auth/verify-otp` (returns `isNewUser: true` for new users)
+    3. Complete signup with `/auth/signup` using the same OTP from step 1
+    4. Use the JWT token returned from signup for subsequent authenticated requests
+    
+    **For Existing Users:**
+    1. Send OTP to your phone number using `/auth/send-otp`
+    2. Verify OTP using `/auth/verify-otp` (returns `isNewUser: false` with JWT token)
+    3. Use the JWT token for subsequent authenticated requests
+    
+    **Alternative (Session-based):**
+    - Use `/auth/session/login` to get a session token
+    - Include the session token in subsequent requests
   version: 1.0.0
   contact:
     name: 24Krafts Support
@@ -585,7 +596,13 @@ paths:
       tags:
         - Auth
       summary: Verify OTP
-      description: Verify OTP for existing users login
+      description: |
+        Verify the OTP sent to the phone number. 
+        
+        - For **existing users**: Returns `isNewUser: false` with a JWT token for immediate authentication
+        - For **new users**: Returns `isNewUser: true` indicating that `/auth/signup` should be called next with the same OTP to complete registration
+        
+        **Note:** The OTP remains valid for signup even after verification, allowing the user to proceed with `/auth/signup` using the same OTP.
       requestBody:
         required: true
         content:
@@ -620,7 +637,15 @@ paths:
       tags:
         - Auth
       summary: Complete signup
-      description: Complete user registration with all details
+      description: |
+        Complete user registration with all required details. 
+        
+        This endpoint accepts the same OTP that was sent via `/auth/send-otp`, even if it was already verified through `/auth/verify-otp`. 
+        
+        **Typical flow:**
+        1. Call `/auth/send-otp` to receive an OTP
+        2. Call `/auth/verify-otp` to verify the OTP (returns `isNewUser: true` for new users)
+        3. Call `/auth/signup` with the same OTP and user details to complete registration
       requestBody:
         required: true
         content:
