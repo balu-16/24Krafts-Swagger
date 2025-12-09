@@ -14,7 +14,7 @@ info:
     **For New Users:**
     1. Send OTP to your phone number using `/auth/send-otp`
     2. Verify OTP using `/auth/verify-otp` (returns `isNewUser: true` for new users)
-    3. Complete signup with `/auth/signup` using the same OTP from step 1
+    3. Complete signup with `/auth/signup` using the same OTP value received in step 1
     4. Use the JWT token returned from signup for subsequent authenticated requests
     
     **For Existing Users:**
@@ -640,12 +640,12 @@ paths:
       description: |
         Complete user registration with all required details. 
         
-        This endpoint accepts the same OTP that was sent via `/auth/send-otp`, even if it was already verified through `/auth/verify-otp`. 
+        This endpoint accepts the same OTP value that was sent via `/auth/send-otp`, even if it was already verified through `/auth/verify-otp`. 
         
         **Typical flow:**
-        1. Call `/auth/send-otp` to receive an OTP
+        1. Call `/auth/send-otp` to receive an OTP via SMS
         2. Call `/auth/verify-otp` to verify the OTP (returns `isNewUser: true` for new users)
-        3. Call `/auth/signup` with the same OTP and user details to complete registration
+        3. Call `/auth/signup` with the same OTP value and user details to complete registration
       requestBody:
         required: true
         content:
