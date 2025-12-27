@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: 24Krafts API
+  description: |
+    ## 24Krafts Backend API Documentation
+
+    ### Authentication Flow
+
+    #### For New Users (Signup):
+    1. **POST /api/auth/send-otp** - Send OTP to phone number
+    2. **POST /api/auth/verify-otp** - Verify OTP (returns `access_token` with `isNewUser: true`)
+    3. **POST /api/auth/signup** - Complete registration using the `access_token` from step 2
+
+    #### For Existing Users (Login):
+    1. **POST /api/auth/send-otp** - Send OTP to phone number
+    2. **POST /api/auth/verify-otp** - Verify OTP (returns `access_token` with `isNewUser: false`)
+
+    ### Authorization
+    All protected endpoints require a JWT token in the Authorization header:
+    ```
+    Authorization: Bearer <access_token>
+    ```
+  version: 1.0
+servers:
+  - url: https://24-krafts-backend.vercel.app/api
+    description: Production server (Vercel) - Primary
+  - url: http://localhost:3000/api
+    description: Development server (local)
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Auth
+    description: Authentication endpoints - OTP, Login, Signup
+  - name: Users
+    description: User management
+  - name: Profiles
+    description: User profile management
+  - name: Posts
+    description: Posts and project applications
+  - name: Projects
+    description: Project management
+  - name: Chat
+    description: Conversations and messaging
+  - name: Schedules
+    description: Schedule management for projects
+  - name: Uploads
+    description: File uploads
+  - name: Notifications
+    description: Push notification management
+  - name: Admin
+    description: Admin endpoints
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter JWT token obtained from /api/auth/verify-otp
+  schemas:
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+    Success:
+      type: object
+      properties:
+        message:
+          type: string
+security:
+  - BearerAuth: []
+
