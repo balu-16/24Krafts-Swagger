@@ -71,6 +71,510 @@ components:
       properties:
         message:
           type: string
+    Sender:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: profiles.id
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        sender_id:
+          type: string
+          format: uuid
+          description: profiles.id of the sender
+        content:
+          type: string
+        message_type:
+          type: string
+          enum: [text, image, file, audio, video]
+          default: text
+        status:
+          type: string
+          enum: [sent, delivered, read]
+        client_message_id:
+          type: string
+          nullable: true
+          description: Client-generated idempotency key
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        sender:
+          $ref: '#/components/schemas/Sender'
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          nullable: true
+          description: Group name (null for direct conversations)
+        is_group:
+          type: boolean
+        created_by:
+          type: string
+          format: uuid
+          description: profiles.id of the creator
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        last_message:
+          $ref: '#/components/schemas/Message'
+          nullable: true
+        unread_count:
+          type: integer
+          description: Number of unread messages for the requesting user
+    ConversationDetail:
+      allOf:
+        - $ref: '#/components/schemas/Conversation'
+        - type: object
+          properties:
+            conversation_participants:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    format: uuid
+                    description: profiles.id of the participant
+                  joined_at:
+                    type: string
+                    format: date-time
+                  last_read_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  profiles:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      first_name:
+                        type: string
+                        nullable: true
+                      last_name:
+                        type: string
+                        nullable: true
+                      display_name:
+                        type: string
+                        nullable: true
+    CreateConversationDto:
+      type: object
+      required:
+        - member_ids
+      properties:
+        is_group:
+          type: boolean
+          default: false
+          description: Set true for group conversations
+        name:
+          type: string
+          nullable: true
+          description: Group name (required when is_group is true)
+        member_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of users.id (JWT sub) for each participant to add
+    SendMessageDto:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          maxLength: 5000
+        messageType:
+          type: string
+          enum: [text, image, file, audio, video]
+          default: text
+        client_msg_id:
+          type: string
+          maxLength: 150
+          description: |
+            Optional client-generated idempotency key.
+            If the same key is sent twice, the server returns the first message.
+
+paths:
+  # ── Chat: Conversations ────────────────────────────────────────────────────
+  /conversations:
+    get:
+      tags:
+        - Chat
+      summary: List conversations
+      description: |
+        Returns all conversations for the authenticated user, cursor-paginated newest first.
+        Identity is inferred from the JWT — no `profileId` query param required.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Opaque pagination cursor returned by the previous response
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: Number of conversations to return
+      responses:
+        '200':
+          description: Paginated list of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+                  nextCursor:
+                    type: string
+                    nullable: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Chat
+      summary: Create conversation
+      description: |
+        Creates a new direct or group conversation.
+        Pass `member_ids` as an array of **users.id** (UUID) values (from JWT `sub`).
+        The creator is automatically added as a participant.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationDto'
+            examples:
+              direct:
+                summary: Direct conversation
+                value:
+                  member_ids:
+                    - 550e8400-e29b-41d4-a716-446655440000
+              group:
+                summary: Group conversation
+                value:
+                  is_group: true
+                  name: "Project Team"
+                  member_ids:
+                    - 550e8400-e29b-41d4-a716-446655440000
+                    - 660e8400-e29b-41d4-a716-446655440001
+      responses:
+        '201':
+          description: Conversation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '403':
+          description: Forbidden / profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}:
+    get:
+      tags:
+        - Chat
+      summary: Get conversation by ID
+      description: Returns conversation details including the full participant list.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation UUID
+      responses:
+        '200':
+          description: Conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+        '403':
+          description: Forbidden - authenticated user is not a participant of this conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}/messages:
+    get:
+      tags:
+        - Chat
+      summary: Get messages
+      description: |
+        Returns messages in a conversation, cursor-paginated from newest to oldest.
+        Pass the `nextCursor` from a previous response to load older messages.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation UUID
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Opaque cursor from previous response (loads messages older than cursor)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 40
+            minimum: 1
+            maximum: 100
+          description: Number of messages to return
+      responses:
+        '200':
+          description: Paginated list of messages (ascending order)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  nextCursor:
+                    type: string
+                    nullable: true
+        '403':
+          description: Forbidden - authenticated user is not a participant of this conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Chat
+      summary: Send message (REST)
+      description: |
+        Send a message via REST. Rate limited to **10 messages per second**.
+        **Prefer the WebSocket `send_message` event** for real-time delivery with ACKs.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageDto'
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '403':
+          description: Not a member of this conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}/typing:
+    post:
+      tags:
+        - Chat
+      summary: Update typing status (REST)
+      description: |
+        Update the typing indicator for the authenticated user in a conversation.
+        **Prefer the WebSocket `typing` event** for real-time updates.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_typing
+              properties:
+                is_typing:
+                  type: boolean
+                  description: Whether the user is currently typing
+      responses:
+        '200':
+          description: Typing status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '403':
+          description: Forbidden - authenticated user is not a participant of this conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}/presence:
+    post:
+      tags:
+        - Chat
+      summary: Update presence / heartbeat (REST)
+      description: |
+        Mark the authenticated user as online and update `last_seen`.
+        Call this periodically as a heartbeat when the WebSocket is not available.
+        **The WebSocket connection handles presence automatically on connect/disconnect.**
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation UUID
+      responses:
+        '200':
+          description: Presence updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '403':
+          description: Forbidden - authenticated user is not a participant of this conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 security:
   - BearerAuth: []
 
+# ── WebSocket API (Socket.IO) ──────────────────────────────────────────────
+# Namespace : /chat
+# Transport : Socket.IO (connect via ws://host/chat or http://host/chat)
+# Auth      : Pass JWT in socket.io handshake auth → { token: "<JWT>" }
+#             OR in HTTP Authorization header during handshake.
+# Identity  : JWT `sub` (users.id) is the authoritative chat identity.
+#             Service maps users.id to profiles.id for participant checks/persistence.
+#
+# ── Client → Server events ────────────────────────────────────────────────
+# join_conversation   { conversationId: string }
+#   Join a Socket.IO room to receive real-time messages.
+#   Server verifies participant membership before joining.
+#
+# leave_conversation  { conversationId: string }
+#   Leave the room. No further messages will be received for this conversation.
+#
+# send_message        { conversationId, clientMsgId, content, messageType? }
+#   Send a message. Idempotent via clientMsgId.
+#   Rate limited: 10 messages / second per connection.
+#   Participant membership is required; otherwise server emits `error`.
+#
+# mark_read           { conversationId, messageIds: string[] }
+#   Mark a list of messages as read. Triggers a single messages_read broadcast.
+#   Participant membership is required.
+#
+# typing              { conversationId, isTyping: boolean }
+#   Broadcast typing indicator to all other participants in the room.
+#   Participant membership is required.
+#
+# ── Server → Client events ────────────────────────────────────────────────
+# authenticated         { userId, message }          — emitted on successful connect
+# error                 { code, message }             — auth/validation/runtime failures
+# pending_messages      { messages: Message[] }       — undelivered msgs on connect
+# new_message           { messageId, conversationId, senderId, content, messageType,
+#                         status, createdAt, clientMsgId, sender }
+# message_sent_ack      { clientMsgId, messageId, conversationId, status, createdAt }
+# message_delivered     { messageId, conversationId, deliveredAt }
+# messages_read         { conversationId, messageIds, readAt, readBy }
+# user_typing           { conversationId, userId, isTyping }
+#
+# Common error codes: unauthorized, bad_request, forbidden,
+# send_failed, mark_read_failed, typing_failed
